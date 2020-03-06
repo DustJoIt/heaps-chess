@@ -1,8 +1,7 @@
 package src.pieces;
 
 import src.AssetsManager.Color;
-
-using src.Constraints;
+import src.Constraints.BoardMove;
 
 class Pawn extends Entity implements src.pieces.IPiece {
 	private var moved:Bool = false;
@@ -26,49 +25,51 @@ class Pawn extends Entity implements src.pieces.IPiece {
 		this.spr.filter = null;
 	}
 
-    public function moveTo(toX: Int, toY: Int) {
+	public function moveTo(toX:Int, toY:Int) {
 		this.x = toX;
 		this.y = toY;
+		moved = true;
 	};
 
-	public function canMoveTo() {
+	public function canMoveTo(boardState:Array<Array<IPiece>>) {
 		var direction = color == Black ? 1 : -1;
 
-		var moves:Array<BoardMove> = [
-			{
-				x: this.x,
-				y: this.y + direction,
-				canAttack: false,
-				canOnlyAttack: false,
-				pieceColor: this.color
-			}
-		];
+		var moves:Array<BoardMove> = [];
 
-		if (!moved) {
+		// Moving
+		for (i in 1...(2 + (moved ? 0 : 1))) {
+			var tY = y + i * direction;
+			if (tY > Constraints.BOARD_SIZE || tY < 0 || boardState[tY][x] != null)
+				break;
+
 			moves.push({
 				x: this.x,
-				y: this.y + direction * 2,
-				canAttack: false,
-				canOnlyAttack: false,
-				pieceColor: this.color
+				y: tY,
+				// TODO - change to manager
+				color: 0x00FF00
 			});
 		}
 
-		moves.push({
-			x: this.x - 1,
-			y: this.y + direction,
-			canAttack: true,
-			canOnlyAttack: true,
-			pieceColor: this.color
-		});
-		moves.push({
-			x: this.x + 1,
-			y: this.y + direction,
-			canAttack: true,
-			canOnlyAttack: true,
-			pieceColor: this.color
-		});
+		// Attacking
+		for (i in [-1, 1]) {
+			var tX = x + i;
+			var tY = y + direction;
+			if (tY < 0 || tY > Constraints.BOARD_SIZE)
+				break;
+			if (tX > Constraints.BOARD_SIZE || tX < 0 || boardState[tY][tX] == null)
+				continue;
 
-		return moves.filterOut();
+			if (boardState[tY][tX].color == color)
+				continue;
+
+			moves.push({
+				x: tX,
+				y: tY,
+				// TODO - change to manager
+				color: 0xFF0000
+			});
+		}
+
+		return moves;
 	}
 }

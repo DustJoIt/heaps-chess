@@ -1,13 +1,9 @@
 package src;
 
-import src.AssetsManager.Color;
-
 typedef BoardMove = {
 	var x:Int;
 	var y:Int;
-	var pieceColor:Color;
-	var canAttack:Bool;
-	var canOnlyAttack:Bool;
+	var color: Int;
 };
 
 class Constraints {

@@ -4,17 +4,11 @@ import src.IEntity.IEntityInteractable;
 import src.pieces.IPiece;
 import src.Constraints;
 
-typedef BoardPlaceDrawingData = {
-	var x:Int;
-	var y:Int;
-	var color:Int;
-}
-
 class Logic {
 	private var pieces:Array<Array<IPiece>>;
 	private var drawer:Drawer;
 	private var selected:IPiece;
-	private var highlighted:Array<BoardPlaceDrawingData> = [];
+	private var highlighted:Array<BoardMove> = [];
 	private var highlightedEntites:Array<IEntityInteractable> = [];
 
 	public function new(scene:h2d.Scene) {
@@ -24,6 +18,8 @@ class Logic {
 			switch (e.kind) {
 				case EPush:
 					clickDeselect();
+				case EKeyDown:
+					trace(5);
 				default:
 			}
 		});
@@ -50,49 +46,6 @@ class Logic {
 		drawer.update(dt);
 	}
 
-	// Перенести в Piece, передавая туда состояние борды
-	private function prepeareBoardMoves(places:Array<BoardMove>):Array<BoardPlaceDrawingData> {
-		// 1) Уберем те, где стоят братья наши
-		var validPlaces = places.filter(place -> {
-			var lookingAt = pieces[place.y][place.x];
-			if (lookingAt == null) {
-				if (place.canOnlyAttack)
-					return false;
-				return true;
-			}
-			// 1) Уберем те, где стоят братья наши
-			if (lookingAt.color == place.pieceColor)
-				return false;
-			// 3) Если не можем атаковать - клетка должна быть пуста
-			if (!place.canAttack)
-				return false;
-			return true;
-		});
-
-		return validPlaces.map(place -> {
-			var lookingAt = pieces[place.y][place.x];
-			if (place.canOnlyAttack) {
-				return {
-					x: place.x,
-					y: place.y,
-					color: 0xFF0000
-				}
-			}
-			if (place.canAttack && lookingAt != null) {
-				return {
-					x: place.x,
-					y: place.y,
-					color: 0xFF0000
-				}
-			}
-			return {
-				x: place.x,
-				y: place.y,
-				color: 0x00FF00
-			}
-		});
-	}
-
 	private function addPiece(piece:IPiece) {
 		drawer.addPiece(piece);
 		pieces[piece.y][piece.x] = piece;
@@ -101,8 +54,7 @@ class Logic {
 		// ? - сделать шаг - ?
 		piece.getObject().onOver = function(e:hxd.Event) {
 			if (selected == null) {
-				var places = piece.canMoveTo();
-				highlighted = prepeareBoardMoves(places);
+				highlighted = piece.canMoveTo(pieces);
 				showHovered(highlighted);
 				drawer.addRectangle(piece.x, piece.y, 0xAAAAAA);
 			}
@@ -111,8 +63,7 @@ class Logic {
 			clickDeselect();
 			selected = piece;
 			piece.select();
-			var places = piece.canMoveTo();
-			highlighted = prepeareBoardMoves(places);
+			highlighted = piece.canMoveTo(pieces);
 			highlightedEntites = highlighted.map(function(place):IEntityInteractable {
 				var g:IEntityInteractable = new src.SelectionRectangle(place.x, place.y, place.color);
 				addSelectionRectangle(g);
@@ -135,10 +86,11 @@ class Logic {
 
 	private function processMove(piece:IPiece, toX:Int, toY:Int) {
 		var goesTo = pieces[toY][toX];
-		if (goesTo != null)
+		if (goesTo != null) {
 			goesTo.remove();
+		}
 
-		pieces[toY][toX] = goesTo;
+		pieces[toY][toX] = piece;
 		pieces[piece.y][piece.x] = null;
 		piece.moveTo(toX, toY);
 	}
@@ -155,7 +107,7 @@ class Logic {
 		addPiece(piece);
 	}
 
-	private function showHovered(places:Array<BoardPlaceDrawingData>) {
+	private function showHovered(places:Array<BoardMove>) {
 		for (place in places) {
 			drawer.addRectangle(place.x, place.y, place.color);
 		}
