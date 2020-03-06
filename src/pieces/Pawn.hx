@@ -39,7 +39,7 @@ class Pawn extends Entity implements src.pieces.IPiece {
 		// Moving
 		for (i in 1...(2 + (moved ? 0 : 1))) {
 			var tY = y + i * direction;
-			if (tY > Constraints.BOARD_SIZE || tY < 0 || boardState[tY][x] != null)
+			if (tY >= Constraints.BOARD_SIZE || tY < 0 || boardState[tY][x] != null)
 				break;
 
 			moves.push({
@@ -54,7 +54,7 @@ class Pawn extends Entity implements src.pieces.IPiece {
 		for (i in [-1, 1]) {
 			var tX = x + i;
 			var tY = y + direction;
-			if (tY < 0 || tY > Constraints.BOARD_SIZE)
+			if (tY < 0 || tY >= Constraints.BOARD_SIZE)
 				break;
 			if (tX > Constraints.BOARD_SIZE || tX < 0 || boardState[tY][tX] == null)
 				continue;
