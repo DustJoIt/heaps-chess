@@ -3,16 +3,13 @@ package src;
 import src.AssetsManager.Kind;
 
 interface IEntity {
-	public var x:Int;
-	public var y:Int;
-	
+	private var spr(default, null):h2d.Object;
+
 	public var kind(default, null):Kind;
+	public var x(get, set):Float;
+	public var y(get, set):Float;
 
-	public function update(dt:Float):Void;
-    public function getObject():h2d.Object;
-	public function remove():Void;
-}
-
-interface IEntityInteractable extends IEntity {
-    public function getObject():h2d.Interactive;
+	public function update(dt:Float): Void ;
+	public function getObject(): h2d.Object;
+	public function remove(): Void;
 }

@@ -1,15 +1,14 @@
 package src;
 
-import src.IEntity.IEntityInteractable;
-import src.pieces.IPiece;
+import src.pieces.Piece;
 import src.Constraints;
 
 class Logic {
-	private var pieces:Array<Array<IPiece>>;
+	private var pieces:Array<Array<Piece>>;
 	private var drawer:Drawer;
-	private var selected:IPiece;
-	private var highlighted:Array<BoardMove> = [];
-	private var highlightedEntites:Array<IEntityInteractable> = [];
+	private var selected:Piece;
+	private var highlightedEntites:Array<IEntity> = [];
+	private var currentPlayer:AssetsManager.Color = White;
 
 	public function new(scene:h2d.Scene) {
 		drawer = new Drawer(scene);
@@ -19,7 +18,7 @@ class Logic {
 				case EPush:
 					clickDeselect();
 				case EKeyDown:
-					trace(5);
+				// trace(5);
 				default:
 			}
 		});
@@ -29,7 +28,7 @@ class Logic {
 		];
 	}
 
-	public function removeEntities(arr:Array<IEntityInteractable>) {
+	public function removeEntities<T:IEntity>(arr:Array<T>) {
 		for (entity in arr) {
 			entity.remove();
 		}
@@ -46,65 +45,74 @@ class Logic {
 		drawer.update(dt);
 	}
 
-	private function addPiece(piece:IPiece) {
+	private function addPiece(piece:Piece) {
 		drawer.addPiece(piece);
-		pieces[piece.y][piece.x] = piece;
+		pieces[piece.cellY][piece.cellX] = piece;
 		// Три функции - onOver - подсветка тех, куда он в теории может пойти (слабая)
-		// OnClick - полная подстветка
-		// ? - сделать шаг - ?
-		piece.getObject().onOver = function(e:hxd.Event) {
+		// OnClick - полная подстветка, создание "selection rectangles" - квадратиков для выбора...
+		// По нажатию на квадратик для выбора перемещаем фигуру
+
+		// TODO - мб переделать?
+		piece.getInter().onOver = function(e:hxd.Event) {
 			if (selected == null) {
-				highlighted = piece.canMoveTo(pieces);
-				showHovered(highlighted);
-				drawer.addRectangle(piece.x, piece.y, 0xAAAAAA);
+				showHovered(piece.canMoveTo(pieces));
+				drawer.addRectangle(piece.cellX, piece.cellY, 0xAAAAAA);
 			}
 		}
-		piece.getObject().onClick = function(e:hxd.Event) {
+		piece.getInter().onClick = function(e:hxd.Event) {
+			if (piece.color != currentPlayer)
+				return;
 			clickDeselect();
 			selected = piece;
 			piece.select();
-			highlighted = piece.canMoveTo(pieces);
-			highlightedEntites = highlighted.map(function(place):IEntityInteractable {
-				var g:IEntityInteractable = new src.SelectionRectangle(place.x, place.y, place.color);
+			var highlighted = piece.canMoveTo(pieces);
+			highlightedEntites = highlighted.map(function(place):IEntity {
+				var g = new src.SelectionRectangle(place.x, place.y, place.color);
 				addSelectionRectangle(g);
 				return g;
 			});
 		}
-		piece.getObject().onOut = function(e:hxd.Event) {
+		piece.getInter().onOut = function(e:hxd.Event) {
 			drawer.clearTemp();
-			highlighted = [];
 		}
 	}
 
-	private function addSelectionRectangle(entity:IEntityInteractable) {
+	private function addSelectionRectangle<T:(ICellEntity & Interactable)>(entity:T) {
 		drawer.addPiece(entity);
-		entity.getObject().onClick = function(e:hxd.Event) {
-			processMove(selected, entity.x, entity.y);
+
+		entity.getInter().onClick = function(e:hxd.Event) {
+			processMove(selected, entity.cellX, entity.cellY);
 			clickDeselect();
 		}
 	}
 
-	private function processMove(piece:IPiece, toX:Int, toY:Int) {
+	private function processMove(piece:Piece, toX:Int, toY:Int) {
 		var goesTo = pieces[toY][toX];
 		if (goesTo != null) {
 			goesTo.remove();
 		}
 
 		pieces[toY][toX] = piece;
-		pieces[piece.y][piece.x] = null;
+		pieces[piece.cellY][piece.cellX] = null;
 		piece.moveTo(toX, toY);
+		currentPlayer = currentPlayer == White ? Black : White;
 	}
 
 	public function startGame() {
 		for (i in 0...8) {
 			// Вынести в фабрику
-			var piece:IPiece = new src.pieces.Pawn(Black, i, 0);
+			var piece:Piece = new src.pieces.Pawn(Black, i, 0);
 			addPiece(piece);
 		}
-		var piece:IPiece = new src.pieces.Pawn(Black, 3, 1);
+		var piece:Piece = new src.pieces.Pawn(Black, 3, 1);
 		addPiece(piece);
 		piece = new src.pieces.Pawn(White, 4, 1);
 		addPiece(piece);
+		for (i in 0...8) {
+			// Вынести в фабрику
+			var piece:Piece = new src.pieces.Pawn(White, i, 7);
+			addPiece(piece);
+		}
 	}
 
 	private function showHovered(places:Array<BoardMove>) {

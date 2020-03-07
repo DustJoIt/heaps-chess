@@ -11,15 +11,6 @@ class Drawer {
 	private final CELL_WIDTH = 64;
 	private final CELL_HEIGHT = 64;
 
-	// private function getLayerNum(kind: Kind) {
-	// 	switch (kind) {
-	// 		case Piece(pt, color):
-	// 			return 5;
-	// 		case Cell(color):
-	// 			return 0;
-	// 	}
-	// }
-
 	public function new(parent:h2d.Scene) {
 		this.world = new h2d.Layers(parent);
 		this.stage = parent;
@@ -76,13 +67,13 @@ class Drawer {
 
 	public function clearTemp() {
 		for (obj in temp) {
-			world.removeChild(obj);
+			obj.remove();
 		}
 		temp = [];
 	}
 
-	public function removePiece(entity:IEntity) {
-		this.world.removeChild(entity.getObject());
+	public function removePiece(entity:Entity) {
+		entity.remove();
 		this.entites.remove(entity);
 	}
 }

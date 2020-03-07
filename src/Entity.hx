@@ -2,30 +2,40 @@ package src;
 
 import src.AssetsManager.Kind;
 
-class Entity implements src.IEntity.IEntityInteractable {
-	public var spr(default, null):h2d.Interactive;
+class Entity implements IEntity {
+	private var spr(default, null):h2d.Object;
+
 	public var kind(default, null):Kind;
+	public var x(get, set):Float;
+	public var y(get, set):Float;
 
-	public var x:Int;
-	public var y:Int;
+	public function get_x() {
+		return spr.x;
+	}
 
-	public function new(kind:Kind, x:Int, y:Int) {
+	public function set_x(x) {
+		return this.spr.x = x;
+	}
+
+	public function get_y() {
+		return spr.x;
+	}
+
+	public function set_y(y) {
+		return this.spr.y = y;
+	}
+
+	public function new(kind:Kind, x:Float, y:Float) {
+		spr = AssetsManager.instance.loadEntity(kind);
 		this.kind = kind;
 		this.x = x;
 		this.y = y;
-
-		spr = AssetsManager.instance.loadEntity(kind);
 	}
 
-	public function update(dt:Float) {
-		// Это неправильно..
-		// Entity - стоят на реальных позициях x,y
-		spr.x = Std.int(x * 64);
-		spr.y = Std.int(y * 64);
-	}
+	public function update(dt:Float) {}
 
 	public function getObject() {
-		return this.spr;
+		return spr;
 	}
 
 	public function remove() {
