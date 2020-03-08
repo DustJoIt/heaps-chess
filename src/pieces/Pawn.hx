@@ -1,26 +1,16 @@
 package src.pieces;
 
-import src.AssetsManager.Color;
-import src.Constraints.BoardMove;
 import src.pieces.Piece;
+import src.Constraints.BoardMove;
+import src.AssetsManager.Color;
+
+using src.CellInt;
 
 class Pawn extends Piece {
 	private var moved:Bool = false;
-	public function new(color:Color, x:Int, y:Int) {
-		super(Kind.Piece(Pawn, color), x, y);
-		this.color = color;
-	}
 
-	override public function update(dt:Float) {
-		super.update(dt);
-	}
-
-	override public function select():Void {
-		this.spr.filter = new h2d.filter.Glow();
-	}
-
-	override public function deselect():Void {
-		this.spr.filter = null;
+	override public function new(color:Color, x:Int, y:Int) {
+		super(Pawn, color, x, y);
 	}
 
 	override public function moveTo(toX:Int, toY:Int) {
@@ -36,7 +26,7 @@ class Pawn extends Piece {
 		// Moving
 		for (i in 1...(2 + (moved ? 0 : 1))) {
 			var tY = cellY + i * direction;
-			if (tY >= Constraints.BOARD_SIZE || tY < 0 || boardState[tY][cellX] != null)
+			if (tY.isOutOfBounds() || boardState[tY][cellX] != null)
 				break;
 
 			moves.push({
@@ -51,9 +41,9 @@ class Pawn extends Piece {
 		for (i in [-1, 1]) {
 			var tX = cellX + i;
 			var tY = cellY + direction;
-			if (tY < 0 || tY >= Constraints.BOARD_SIZE)
+			if (tY.isOutOfBounds())
 				break;
-			if (tX > Constraints.BOARD_SIZE || tX < 0 || boardState[tY][tX] == null)
+			if (tX.isOutOfBounds() || boardState[tY][tX] == null)
 				continue;
 
 			if (boardState[tY][tX].color == color)

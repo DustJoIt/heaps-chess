@@ -64,6 +64,66 @@ class AssetsManager {
 			y: 0,
 			width: 64,
 			height: 64
+		},
+		Kind.Piece(PieceType.Rook, Color.Black) => {
+			x: 128,
+			y: 0,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.Rook, Color.White) => {
+			x: 128,
+			y: 64,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.Knight, Color.White) => {
+			x: 192,
+			y: 64,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.Knight, Color.Black) => {
+			x: 192,
+			y: 0,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.Bishop, Color.White) => {
+			x: 256,
+			y: 64,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.Bishop, Color.Black) => {
+			x: 256,
+			y: 0,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.Queen, Color.White) => {
+			x: 320,
+			y: 64,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.Queen, Color.Black) => {
+			x: 320,
+			y: 0,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.King, Color.White) => {
+			x: 384,
+			y: 64,
+			width: 64,
+			height: 64
+		},
+		Kind.Piece(PieceType.King, Color.Black) => {
+			x: 384,
+			y: 0,
+			width: 64,
+			height: 64
 		}
 	];
 

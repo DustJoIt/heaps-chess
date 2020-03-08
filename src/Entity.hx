@@ -2,7 +2,7 @@ package src;
 
 import src.AssetsManager.Kind;
 
-class Entity implements IEntity {
+class Entity {
 	private var spr(default, null):h2d.Object;
 
 	public var kind(default, null):Kind;

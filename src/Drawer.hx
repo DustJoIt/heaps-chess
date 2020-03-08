@@ -5,7 +5,7 @@ import src.AssetsManager.Color;
 class Drawer {
 	private var world:h2d.Layers;
 	private var stage:h2d.Scene;
-	private var entites:Array<IEntity> = [];
+	private var entites:Array<Entity> = [];
 	private var temp: Array<h2d.Object> = [];
 
 	private final CELL_WIDTH = 64;
@@ -46,7 +46,7 @@ class Drawer {
 		}
 	}
 
-	public function addPiece(enitity:IEntity) {
+	public function addPiece(enitity:Entity) {
 		// TODO  подумать
 		this.world.add(enitity.getObject(), 5);
 		this.entites.push(enitity);

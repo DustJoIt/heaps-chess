@@ -7,7 +7,7 @@ class Logic {
 	private var pieces:Array<Array<Piece>>;
 	private var drawer:Drawer;
 	private var selected:Piece;
-	private var highlightedEntites:Array<IEntity> = [];
+	private var highlightedEntites:Array<Entity> = [];
 	private var currentPlayer:AssetsManager.Color = White;
 
 	public function new(scene:h2d.Scene) {
@@ -28,7 +28,7 @@ class Logic {
 		];
 	}
 
-	public function removeEntities<T:IEntity>(arr:Array<T>) {
+	public function removeEntities<T:Entity>(arr:Array<T>) {
 		for (entity in arr) {
 			entity.remove();
 		}
@@ -53,31 +53,35 @@ class Logic {
 		// По нажатию на квадратик для выбора перемещаем фигуру
 
 		// TODO - мб переделать?
-		piece.getInter().onOver = function(e:hxd.Event) {
+		var iter = piece.getInter();
+		iter.onOver = function(e:hxd.Event) {
 			if (selected == null) {
 				showHovered(piece.canMoveTo(pieces));
 				drawer.addRectangle(piece.cellX, piece.cellY, 0xAAAAAA);
 			}
 		}
-		piece.getInter().onClick = function(e:hxd.Event) {
+		iter.onClick = function(e:hxd.Event) {
+			#if !debug
 			if (piece.color != currentPlayer)
 				return;
+			#end
+			drawer.clearTemp();
 			clickDeselect();
 			selected = piece;
 			piece.select();
 			var highlighted = piece.canMoveTo(pieces);
-			highlightedEntites = highlighted.map(function(place):IEntity {
+			highlightedEntites = highlighted.map(function(place):Entity {
 				var g = new src.SelectionRectangle(place.x, place.y, place.color);
 				addSelectionRectangle(g);
 				return g;
 			});
 		}
-		piece.getInter().onOut = function(e:hxd.Event) {
+		iter.onOut = function(e:hxd.Event) {
 			drawer.clearTemp();
 		}
 	}
 
-	private function addSelectionRectangle<T:(ICellEntity & Interactable)>(entity:T) {
+	private function addSelectionRectangle<T:(CellEntity & Interactable)>(entity:T) {
 		drawer.addPiece(entity);
 
 		entity.getInter().onClick = function(e:hxd.Event) {
@@ -99,19 +103,12 @@ class Logic {
 	}
 
 	public function startGame() {
-		for (i in 0...8) {
-			// Вынести в фабрику
-			var piece:Piece = new src.pieces.Pawn(Black, i, 0);
-			addPiece(piece);
-		}
-		var piece:Piece = new src.pieces.Pawn(Black, 3, 1);
-		addPiece(piece);
-		piece = new src.pieces.Pawn(White, 4, 1);
-		addPiece(piece);
-		for (i in 0...8) {
-			// Вынести в фабрику
-			var piece:Piece = new src.pieces.Pawn(White, i, 7);
-			addPiece(piece);
+		for (j in 0...Constraints.gameStart.length) {
+			for (i in 0...Constraints.gameStart[0].length) {
+				pieces[j][i] = src.pieces.PieceFactory.createPieceKind(Constraints.gameStart[j][i], i, j);
+				if (pieces[j][i] != null)
+					addPiece(pieces[j][i]);
+			}
 		}
 	}
 
