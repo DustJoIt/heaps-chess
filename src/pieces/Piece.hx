@@ -2,7 +2,7 @@ package src.pieces;
 
 import src.AssetsManager.Kind;
 import src.AssetsManager.PieceType;
-import src.Constraints.BoardMove;
+import src.Constraints.MoveType;
 import src.AssetsManager.Color;
 
 class Piece extends src.CellEntity implements Interactable {
@@ -30,7 +30,11 @@ class Piece extends src.CellEntity implements Interactable {
 		return cast(this.spr, h2d.Interactive);
 	}
 
-	public function canMoveTo(boardState:Array<Array<Piece>>):Array<BoardMove> {
+	public function getBeaten(boardState:Array<Array<Piece>>) {
+		return canMoveTo(boardState);
+	}
+
+	public function canMoveTo(boardState:Array<Array<Piece>>):Array<MoveType> {
 		return [];
 	}
 }

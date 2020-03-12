@@ -1,5 +1,7 @@
 package src;
 
+using src.Beaten;
+
 import src.pieces.Piece;
 import src.Constraints;
 
@@ -8,6 +10,8 @@ class Logic {
 	private var drawer:Drawer;
 	private var selected:Piece;
 	private var highlightedEntites:Array<Entity> = [];
+	private var beatenWhite: Array<Array<Bool>>;
+	private var beatenBlack: Array<Array<Bool>>;
 	private var currentPlayer:AssetsManager.Color = White;
 
 	public function new(scene:h2d.Scene) {
@@ -18,7 +22,7 @@ class Logic {
 				case EPush:
 					clickDeselect();
 				case EKeyDown:
-				// trace(5);
+					trace(5);
 				default:
 			}
 		});
@@ -70,36 +74,73 @@ class Logic {
 			selected = piece;
 			piece.select();
 			var highlighted = piece.canMoveTo(pieces);
-			highlightedEntites = highlighted.map(function(place):Entity {
-				var g = new src.SelectionRectangle(place.x, place.y, place.color);
-				addSelectionRectangle(g);
-				return g;
-			});
+			for (type in highlighted) {
+				addSelectionRectangle(type);
+			}
 		}
 		iter.onOut = function(e:hxd.Event) {
 			drawer.clearTemp();
 		}
 	}
 
-	private function addSelectionRectangle<T:(CellEntity & Interactable)>(entity:T) {
-		drawer.addPiece(entity);
+	private function addSelectionRectangle(moveType:MoveType) {
+		// TODO - learn how to parse;
+		var g:SelectionRectangle;
+		switch (moveType) {
+			case Move(to):
+				g = new SelectionRectangle(to.x, to.y, 0x00FF00);
+			case Capture(to):
+				g = new SelectionRectangle(to.x, to.y, 0xFF0000);
+			case Castling(to, rook) | CastlingLong(to, rook) :
+				g = new SelectionRectangle(to.x, to.y, 0x0000FF);
+			case EnPassant(to, pawn):
+				g = new SelectionRectangle(to.x, to.y, 0x0000FF);
+		}
+		highlightedEntites.push(g);
+		drawer.addPiece(g);
 
-		entity.getInter().onClick = function(e:hxd.Event) {
-			processMove(selected, entity.cellX, entity.cellY);
+		g.getInter().onClick = function(e:hxd.Event) {
+			processMove(selected, moveType);
 			clickDeselect();
 		}
 	}
 
-	private function processMove(piece:Piece, toX:Int, toY:Int) {
-		var goesTo = pieces[toY][toX];
-		if (goesTo != null) {
-			goesTo.remove();
+	private function processMove(piece:Piece, move:MoveType) {
+		// generic
+		switch (move) {
+			case Move(to) | Capture(to) | Castling(to, _) | CastlingLong(to, _) |EnPassant(to, _):
+				var goesTo = pieces[to.y][to.x];
+				if (goesTo != null) {
+					goesTo.remove();
+				}
+
+				pieces[to.y][to.x] = piece;
+				pieces[piece.cellY][piece.cellX] = null;
+				piece.moveTo(to.x, to.y);
+				currentPlayer = currentPlayer == White ? Black : White;
+		}
+		// specific
+		switch (move) {
+			case Castling(to, rook):
+				// мм... хардкод
+				pieces[rook.cellY][rook.cellX] = null;
+				pieces[to.y][to.x - 1] = rook;
+				rook.moveTo(to.x - 1, to.y);
+			case CastlingLong(to, rook):
+				// TODO - мне пиздец не нравится, что управление pieces в каждом случае нужно делать руками
+				// мб вынести во что-то?
+				pieces[rook.cellY][rook.cellX] = null;
+				pieces[to.y][to.x + 1] = rook;
+				rook.moveTo(to.x + 1, to.y);
+			case EnPassant(to, pawn):
+				pawn.remove();
+				pieces[pawn.cellY][pawn.cellX] = null;
+			default:
 		}
 
-		pieces[toY][toX] = piece;
-		pieces[piece.cellY][piece.cellX] = null;
-		piece.moveTo(toX, toY);
-		currentPlayer = currentPlayer == White ? Black : White;
+		beatenWhite = pieces.getBeatenCells(White);
+		beatenBlack = pieces.getBeatenCells(Black);
+
 	}
 
 	public function startGame() {
@@ -110,11 +151,23 @@ class Logic {
 					addPiece(pieces[j][i]);
 			}
 		}
+
+		beatenWhite = pieces.getBeatenCells(White);
+		beatenBlack = pieces.getBeatenCells(Black);
 	}
 
-	private function showHovered(places:Array<BoardMove>) {
+	private function showHovered(places:Array<MoveType>) {
 		for (place in places) {
-			drawer.addRectangle(place.x, place.y, place.color);
+			switch (place) {
+				case Move(to):
+					drawer.addRectangle(to.x, to.y, 0x00FF00);
+				case Capture( to):
+					drawer.addRectangle(to.x, to.y, 0xFF0000);
+				case Castling(to, rook) | CastlingLong(to, rook):
+					drawer.addRectangle(to.x, to.y, 0x00FF00);
+				case EnPassant(to, pawn):
+					drawer.addRectangle(to.x, to.y, 0x00FF00);
+			}
 		}
 	}
 }

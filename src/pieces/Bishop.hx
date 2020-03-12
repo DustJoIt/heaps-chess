@@ -4,15 +4,15 @@ using src.Constraints;
 using src.CellInt;
 
 import src.AssetsManager.Color;
-import src.Constraints.BoardMove;
+import src.Constraints.MoveType;
 
 class Bishop extends Piece {
 	override public function new(color:Color, x:Int, y:Int) {
 		super(Bishop, color, x, y);
 	}
 
-	override public function canMoveTo(boardState:Array<Array<Piece>>):Array<BoardMove> {
-		var moves:Array<BoardMove> = [];
+	override public function canMoveTo(boardState:Array<Array<Piece>>):Array<MoveType> {
+		var moves:Array<MoveType> = [];
 
 		for (direction in [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
 			var dirX = direction[0];
@@ -26,9 +26,9 @@ class Bishop extends Piece {
 					break;
 
 				if (lookingAt == null) {
-					moves.addMove(tX, tY, 0x00FF00);
+					moves.push(Move(this.createCell(tX, tY)));
 				} else {
-					moves.addMove(tX, tY, 0xFF0000);
+					moves.push(Capture(this.createCell(tX, tY)));
 					break;
 				}
 

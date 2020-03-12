@@ -4,15 +4,15 @@ using src.Constraints;
 using src.CellInt;
 
 import src.AssetsManager.Color;
-import src.Constraints.BoardMove;
+import src.Constraints.MoveType;
 
 class Queen extends Piece {
 	override public function new(color:Color, x:Int, y:Int) {
 		super(Queen, color, x, y);
 	}
 
-	override public function canMoveTo(boardState:Array<Array<Piece>>):Array<BoardMove> {
-		var moves:Array<BoardMove> = [];
+	override public function canMoveTo(boardState:Array<Array<Piece>>):Array<MoveType> {
+		var moves:Array<MoveType> = [];
 		// Просто скопировал код с ладьи и слона
 		for (isX in [true, false]) {
 			for (direction in [-1, 1]) {
@@ -25,14 +25,14 @@ class Queen extends Piece {
 
 					var lookingAt = boardState[tY][tX];
 					if (lookingAt == null) {
-						moves.addMove(tX, tY, 0x00FF00);
+						moves.push(Move(this.createCell(tX, tY)));
 						continue;
 					}
 
 					if (lookingAt.color == color)
 						break;
 
-					moves.addMove(tX, tY, 0xFF0000);
+					moves.push(Capture(this.createCell(tX, tY)));
 					break;
 				}
 			}
@@ -50,9 +50,9 @@ class Queen extends Piece {
 					break;
 
 				if (lookingAt == null) {
-					moves.addMove(tX, tY, 0x00FF00);
+					moves.push(Move(this.createCell(tX, tY)));
 				} else {
-					moves.addMove(tX, tY, 0xFF0000);
+					moves.push(Capture(this.createCell(tX, tY)));
 					break;
 				}
 

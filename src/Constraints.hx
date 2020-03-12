@@ -4,19 +4,27 @@ using src.CellInt;
 
 import src.AssetsManager.PieceType;
 import src.AssetsManager.Kind;
+import src.pieces.Piece;
 
-typedef BoardMove = {
-	var x:Int;
-	var y:Int;
-	var color:Int;
-};
+typedef Cell = {
+	x:Int,
+	y:Int
+}
+
+enum MoveType {
+	Move(to:Cell);
+	Capture(to:Cell);
+	Castling(to:Cell, rook:Piece);
+	CastlingLong(to:Cell, rook:Piece);
+	EnPassant(to:Cell, pawn:Piece);
+}
 
 class Constraints {
 	static public final BOARD_SIZE = 8;
 	static public final CELL_WIDTH = 64;
 	static public final CELL_HEIGHT = 64;
 
-	static public final gameStart: Array<Array<Kind>> = [
+	static public final gameStart:Array<Array<Kind>> = [
 		[
 			Kind.Piece(Rook, Black),
 			Kind.Piece(Knight, Black),
@@ -43,20 +51,25 @@ class Constraints {
 			Kind.Piece(Knight, White),
 			Kind.Piece(Rook, White)
 		]
-
 	];
 
-	static public inline function addMove(moves:Array<BoardMove>, x:Int, y:Int, color:Int) {
-		moves.push({
-			x: x,
-			y: y,
-			color: color
-		});
+	static public inline function getPos(piece:Piece):Cell {
+		return {
+			x: piece.cellX,
+			y: piece.cellY
+		}
 	}
 
-	static public function filterOut(moves:Array<BoardMove>) {
-		return moves.filter(move -> {
-			return (!move.x.isOutOfBounds() && !move.y.isOutOfBounds());
-		});
+	static public inline function createCell(piece:Piece, x:Int, y:Int):Cell {
+		return {
+			x: x,
+			y: y
+		}
 	}
+
+	// static public function filterOut(moves:Array<MoveType>) {
+	// 	return moves.filter(move -> {
+	// 		return (!move.x.isOutOfBounds() && !move.y.isOutOfBounds());
+	// 	});
+	// }
 }
