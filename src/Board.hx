@@ -4,8 +4,6 @@ import src.Constraints.Cell;
 import src.AssetsManager.Color;
 import src.pieces.Piece;
 
-using src.Beaten;
-
 class Board {
 	private var drawer:Drawer;
 

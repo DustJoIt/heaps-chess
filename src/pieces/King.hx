@@ -66,22 +66,39 @@ class King extends Piece {
 		}
 
 		if (!moved) {
+			var beatenMap = boardState.getBeatenMap(color);
 			// Рокировка короткая
 			var lookTo = boardState.getPiece(cellX + 3, cellY);
 			if (Std.is(lookTo, Rook) && lookTo.color == color && !cast(lookTo, Rook).moved) {
 				var flag = true;
+				var beatenMap = boardState.getBeatenMap(color);  
 				for (i in 1...3) {
-					var beatenMap = boardState.getBeatenMap(color);  
 					var curr = boardState.getPiece(cellX + i, cellY);
-					trace(beatenMap.getCell(cellX + i, cellY));
 					if (curr != null || beatenMap.getCell(cellX + i, cellY)) {
 						flag = false;
 						break;
 					}
 				}
 
-				if (flag) {
+				if (flag && !beatenMap[cellY][cellX]) {
 					moves.push(Castling(this.createCell(cellX + 2, cellY), lookTo));
+				}
+			}
+
+			// Рокировка длинная
+			var lookTo = boardState.getPiece(cellX - 4, cellY);
+			if (Std.is(lookTo, Rook) && lookTo.color == color && !cast(lookTo, Rook).moved) {
+				var flag = true;				
+				for (i in 1...4) {
+					var curr = boardState.getPiece(cellX - i, cellY);
+					if (curr != null || beatenMap.getCell(cellX - i, cellY)) {
+						flag = false;
+						break;
+					}
+				}
+
+				if (flag && !beatenMap[cellY][cellX]) {
+					moves.push(CastlingLong(this.createCell(cellX - 3, cellY), lookTo));
 				}
 			}
 		}
