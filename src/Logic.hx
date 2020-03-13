@@ -1,17 +1,14 @@
 package src;
 
-using src.Beaten;
 
 import src.pieces.Piece;
 import src.Constraints;
 
 class Logic {
-	private var pieces:Array<Array<Piece>>;
+	private var board:Board;
 	private var drawer:Drawer;
 	private var selected:Piece;
 	private var highlightedEntites:Array<Entity> = [];
-	private var beatenWhite: Array<Array<Bool>>;
-	private var beatenBlack: Array<Array<Bool>>;
 	private var currentPlayer:AssetsManager.Color = White;
 
 	public function new(scene:h2d.Scene) {
@@ -26,10 +23,6 @@ class Logic {
 				default:
 			}
 		});
-
-		pieces = [
-			for (j in 0...Constraints.BOARD_SIZE) [for (i in 0...Constraints.BOARD_SIZE) null]
-		];
 	}
 
 	public function removeEntities<T:Entity>(arr:Array<T>) {
@@ -50,8 +43,7 @@ class Logic {
 	}
 
 	private function addPiece(piece:Piece) {
-		drawer.addPiece(piece);
-		pieces[piece.cellY][piece.cellX] = piece;
+		board.addPiece(piece, piece.cellX, piece.cellY);
 		// Три функции - onOver - подсветка тех, куда он в теории может пойти (слабая)
 		// OnClick - полная подстветка, создание "selection rectangles" - квадратиков для выбора...
 		// По нажатию на квадратик для выбора перемещаем фигуру
@@ -60,7 +52,7 @@ class Logic {
 		var iter = piece.getInter();
 		iter.onOver = function(e:hxd.Event) {
 			if (selected == null) {
-				showHovered(piece.canMoveTo(pieces));
+				showHovered(piece.canMoveTo(board));
 				drawer.addRectangle(piece.cellX, piece.cellY, 0xAAAAAA);
 			}
 		}
@@ -73,7 +65,7 @@ class Logic {
 			clickDeselect();
 			selected = piece;
 			piece.select();
-			var highlighted = piece.canMoveTo(pieces);
+			var highlighted = piece.canMoveTo(board);
 			for (type in highlighted) {
 				addSelectionRectangle(type);
 			}
@@ -84,7 +76,6 @@ class Logic {
 	}
 
 	private function addSelectionRectangle(moveType:MoveType) {
-		// TODO - learn how to parse;
 		var g:SelectionRectangle;
 		switch (moveType) {
 			case Move(to):
@@ -109,51 +100,36 @@ class Logic {
 		// generic
 		switch (move) {
 			case Move(to) | Capture(to) | Castling(to, _) | CastlingLong(to, _) |EnPassant(to, _):
-				var goesTo = pieces[to.y][to.x];
-				if (goesTo != null) {
-					goesTo.remove();
-				}
-
-				pieces[to.y][to.x] = piece;
-				pieces[piece.cellY][piece.cellX] = null;
-				piece.moveTo(to.x, to.y);
+				board.movePiece(piece, to.x, to.y);
 				currentPlayer = currentPlayer == White ? Black : White;
 		}
 		// specific
 		switch (move) {
 			case Castling(to, rook):
 				// мм... хардкод
-				pieces[rook.cellY][rook.cellX] = null;
-				pieces[to.y][to.x - 1] = rook;
-				rook.moveTo(to.x - 1, to.y);
+				board.movePiece(rook, to.x - 1, to.y);
 			case CastlingLong(to, rook):
-				// TODO - мне пиздец не нравится, что управление pieces в каждом случае нужно делать руками
-				// мб вынести во что-то?
-				pieces[rook.cellY][rook.cellX] = null;
-				pieces[to.y][to.x + 1] = rook;
-				rook.moveTo(to.x + 1, to.y);
+				board.movePiece(rook, to.x + 1, to.y);
 			case EnPassant(to, pawn):
-				pawn.remove();
-				pieces[pawn.cellY][pawn.cellX] = null;
+				board.removePiece(pawn);
 			default:
 		}
 
-		beatenWhite = pieces.getBeatenCells(White);
-		beatenBlack = pieces.getBeatenCells(Black);
+		board.updateBeatenMaps();
 
 	}
 
 	public function startGame() {
+		board = new Board(drawer);
 		for (j in 0...Constraints.gameStart.length) {
 			for (i in 0...Constraints.gameStart[0].length) {
-				pieces[j][i] = src.pieces.PieceFactory.createPieceKind(Constraints.gameStart[j][i], i, j);
-				if (pieces[j][i] != null)
-					addPiece(pieces[j][i]);
+				var toAdd = src.pieces.PieceFactory.createPieceKind(Constraints.gameStart[j][i], i, j);
+				if (toAdd != null) 
+					addPiece(toAdd);
 			}
 		}
 
-		beatenWhite = pieces.getBeatenCells(White);
-		beatenBlack = pieces.getBeatenCells(Black);
+		board.updateBeatenMaps();
 	}
 
 	private function showHovered(places:Array<MoveType>) {

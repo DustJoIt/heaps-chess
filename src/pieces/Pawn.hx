@@ -19,7 +19,7 @@ class Pawn extends Piece {
 		moved = true;
 	};
 
-	override public function getBeaten(boardState:Array<Array<Piece>>) {
+	override public function getBeaten(boardState:Board) {
 		var direction = color == Black ? 1 : -1;
 
 		var moves:Array<MoveType> = [];
@@ -33,7 +33,7 @@ class Pawn extends Piece {
 			if (tX.isOutOfBounds())
 				continue;
 
-			if (boardState[tY][tX] != null && boardState[tY][tX].color == color)
+			if (boardState.getPiece(tX, tY) != null && boardState.getPiece(tX, tY).color == color)
 				continue;
 
 			moves.push(Capture(this.createCell(tX, tY)));
@@ -42,14 +42,14 @@ class Pawn extends Piece {
 		return moves;
 	}
 
-	override public function canMoveTo(boardState:Array<Array<Piece>>) {
+	override public function canMoveTo(boardState:Board) {
 		var direction = color == Black ? 1 : -1;
 
 		var moves:Array<MoveType> = [];
 		// Moving
 		for (i in 1...(2 + (moved ? 0 : 1))) {
 			var tY = cellY + i * direction;
-			if (tY.isOutOfBounds() || boardState[tY][cellX] != null)
+			if (tY.isOutOfBounds() || boardState.getPiece(cellX, tY) != null)
 				break;
 
 			moves.push(Move(this.createCell(cellX, tY)));
@@ -61,10 +61,10 @@ class Pawn extends Piece {
 			var tY = cellY + direction;
 			if (tY.isOutOfBounds())
 				break;
-			if (tX.isOutOfBounds() || boardState[tY][tX] == null)
+			if (tX.isOutOfBounds() || boardState.getPiece(tX, tY) == null)
 				continue;
 
-			if (boardState[tY][tX].color == color)
+			if (boardState.getPiece(tX, tY).color == color)
 				continue;
 
 			moves.push(Capture(this.createCell(tX, tY)));

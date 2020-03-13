@@ -11,7 +11,7 @@ class Queen extends Piece {
 		super(Queen, color, x, y);
 	}
 
-	override public function canMoveTo(boardState:Array<Array<Piece>>):Array<MoveType> {
+	override public function canMoveTo(boardState:Board):Array<MoveType> {
 		var moves:Array<MoveType> = [];
 		// Просто скопировал код с ладьи и слона
 		for (isX in [true, false]) {
@@ -23,7 +23,7 @@ class Queen extends Piece {
 					if (tX.isOutOfBounds() || tY.isOutOfBounds())
 						break;
 
-					var lookingAt = boardState[tY][tX];
+					var lookingAt = boardState.getPiece(tX, tY);
 					if (lookingAt == null) {
 						moves.push(Move(this.createCell(tX, tY)));
 						continue;
@@ -45,7 +45,7 @@ class Queen extends Piece {
 			var tX = cellX + dirX;
 			var tY = cellY + dirY;
 			while (!tX.isOutOfBounds() && !tY.isOutOfBounds()) {
-				var lookingAt = boardState[tY][tX];
+				var lookingAt = boardState.getPiece(tX, tY);
 				if (lookingAt != null && lookingAt.color == color)
 					break;
 

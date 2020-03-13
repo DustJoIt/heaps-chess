@@ -30,11 +30,11 @@ class Piece extends src.CellEntity implements Interactable {
 		return cast(this.spr, h2d.Interactive);
 	}
 
-	public function getBeaten(boardState:Array<Array<Piece>>) {
+	public function getBeaten(boardState: Board) {
 		return canMoveTo(boardState);
 	}
 
-	public function canMoveTo(boardState:Array<Array<Piece>>):Array<MoveType> {
+	public function canMoveTo(boardState: Board):Array<MoveType> {
 		return [];
 	}
 }

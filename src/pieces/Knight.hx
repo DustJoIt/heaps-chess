@@ -11,14 +11,14 @@ class Knight extends Piece {
 		super(Knight, color, x, y);
 	}
 
-	override public function canMoveTo(boardState:Array<Array<Piece>>):Array<MoveType> {
+	override public function canMoveTo(boardState:Board):Array<MoveType> {
 		var moves:Array<MoveType> = [];
 		for (move in [[1, 2], [-1, 2], [1, -2], [-1, -2], [2, 1], [2, -1], [-2, 1], [-2, -1]]) {
 			var tX = move[0] + cellX;
 			var tY = move[1] + cellY;
 
 			if (!tX.isOutOfBounds() && !tY.isOutOfBounds()) {
-				var lookingAt = boardState[tY][tX];
+				var lookingAt = boardState.getPiece(tX, tY);
 				if (lookingAt == null) {
 					moves.push(Move(this.createCell(tX, tY)));
 					continue;
