@@ -1,6 +1,5 @@
 package src;
 
-
 import src.pieces.Piece;
 import src.Constraints;
 
@@ -82,7 +81,7 @@ class Logic {
 				g = new SelectionRectangle(to.x, to.y, 0x00FF00);
 			case Capture(to):
 				g = new SelectionRectangle(to.x, to.y, 0xFF0000);
-			case Castling(to, rook) | CastlingLong(to, rook) :
+			case Castling(to, rook) | CastlingLong(to, rook):
 				g = new SelectionRectangle(to.x, to.y, 0x0000FF);
 			case EnPassant(to, pawn):
 				g = new SelectionRectangle(to.x, to.y, 0x0000FF);
@@ -98,8 +97,11 @@ class Logic {
 
 	private function processMove(piece:Piece, move:MoveType) {
 		// generic
+		var fromX, fromY:Int;
 		switch (move) {
-			case Move(to) | Capture(to) | Castling(to, _) | CastlingLong(to, _) |EnPassant(to, _):
+			case Move(to) | Capture(to) | Castling(to, _) | CastlingLong(to, _) | EnPassant(to, _):
+				fromX = piece.cellX;
+				fromY = piece.cellY;
 				board.movePiece(piece, to.x, to.y);
 				currentPlayer = currentPlayer == White ? Black : White;
 		}
@@ -115,8 +117,8 @@ class Logic {
 			default:
 		}
 
+		board.logMove({piece: piece, move: move, from: {x: fromX, y: fromY}});
 		board.updateBeatenMaps();
-
 	}
 
 	public function startGame() {
@@ -124,7 +126,7 @@ class Logic {
 		for (j in 0...Constraints.gameStart.length) {
 			for (i in 0...Constraints.gameStart[0].length) {
 				var toAdd = src.pieces.PieceFactory.createPieceKind(Constraints.gameStart[j][i], i, j);
-				if (toAdd != null) 
+				if (toAdd != null)
 					addPiece(toAdd);
 			}
 		}
@@ -137,7 +139,7 @@ class Logic {
 			switch (place) {
 				case Move(to):
 					drawer.addRectangle(to.x, to.y, 0x00FF00);
-				case Capture( to):
+				case Capture(to):
 					drawer.addRectangle(to.x, to.y, 0xFF0000);
 				case Castling(to, rook) | CastlingLong(to, rook):
 					drawer.addRectangle(to.x, to.y, 0x00FF00);

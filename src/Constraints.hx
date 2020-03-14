@@ -1,8 +1,5 @@
 package src;
 
-using src.CellInt;
-
-import src.AssetsManager.PieceType;
 import src.AssetsManager.Kind;
 import src.pieces.Piece;
 

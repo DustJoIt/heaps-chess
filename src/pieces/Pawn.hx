@@ -61,8 +61,24 @@ class Pawn extends Piece {
 			var tY = cellY + direction;
 			if (tY.isOutOfBounds())
 				break;
-			if (tX.isOutOfBounds() || boardState.getPiece(tX, tY) == null)
+			if (tX.isOutOfBounds())
 				continue;
+
+			if (boardState.getPiece(tX, tY) == null) {
+				// EnPassant
+				if (cellY == (color == White ? 3 : 4)) {
+					var lastMove = boardState.lastMove();
+					if (lastMove == null)
+						continue;
+					switch (lastMove.move) {
+						case Move(to):
+							if (Std.is(lastMove.piece, Pawn) && to.y == cellY && to.x == tX && Math.abs(to.y - lastMove.from.y) == 2)
+								moves.push(EnPassant(this.createCell(tX, tY), lastMove.piece));
+						default:
+					}
+				}
+				continue;
+			}
 
 			if (boardState.getPiece(tX, tY).color == color)
 				continue;

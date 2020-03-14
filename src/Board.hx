@@ -1,14 +1,22 @@
 package src;
 
+import src.Constraints.MoveType;
 import src.Constraints.Cell;
 import src.AssetsManager.Color;
 import src.pieces.Piece;
+
+typedef HMove = {
+	piece: Piece, 
+	move: MoveType,
+	from: Cell
+}
 
 class Board {
 	private var drawer:Drawer;
 
 	public var pieces:Array<Array<Piece>>;
 
+	private var history:Array<HMove> = [];
 	private var beatenWhite:Array<Array<Bool>>;
 	private var beatenBlack:Array<Array<Bool>>;
 
@@ -43,6 +51,14 @@ class Board {
 
 	public function getPiece(x:Int, y:Int) {
 		return pieces[y][x];
+	}
+
+	public function logMove(move: HMove) {
+		history.push(move);
+	}
+
+	public function lastMove() {
+		return history[history.length - 1];
 	}
 
 	public function addPiece(piece:Piece, x:Int, y:Int) {
