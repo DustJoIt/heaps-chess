@@ -61,6 +61,7 @@ class Queen extends Piece {
 			}
 		}
 
+
 		return moves;
 	}
 }

@@ -1,14 +1,15 @@
 package src;
 
+import src.pieces.King;
 import src.Constraints.MoveType;
 import src.Constraints.Cell;
 import src.AssetsManager.Color;
 import src.pieces.Piece;
 
 typedef HMove = {
-	piece: Piece, 
-	move: MoveType,
-	from: Cell
+	piece:Piece,
+	move:MoveType,
+	from:Cell
 }
 
 class Board {
@@ -19,6 +20,9 @@ class Board {
 	private var history:Array<HMove> = [];
 	private var beatenWhite:Array<Array<Bool>>;
 	private var beatenBlack:Array<Array<Bool>>;
+
+	private var kingBlack:King;
+	private var kingWhite:King;
 
 	public function new(drawer:Drawer) {
 		this.drawer = drawer;
@@ -38,6 +42,7 @@ class Board {
 					continue;
 
 				var canGoTo = cell.getBeaten(this);
+
 				for (move in canGoTo) {
 					// TODO - ленивый костыль
 					var move_cell:Cell = move.getParameters()[0];
@@ -53,7 +58,7 @@ class Board {
 		return pieces[y][x];
 	}
 
-	public function logMove(move: HMove) {
+	public function logMove(move:HMove) {
 		history.push(move);
 	}
 
@@ -68,7 +73,55 @@ class Board {
 			currAt.remove();
 		}
 
+		if (Std.is(piece, King)) {
+			if (piece.color == White) {
+				kingWhite = cast(piece, King);
+			} else {
+				kingBlack = cast(piece, King);
+			}
+		}
+
 		pieces[y][x] = piece;
+	}
+
+	public function getKing(color:Color) {
+		return color == White ? kingWhite : kingBlack;
+	}
+
+	public function isCheck(color:Color) {
+		var king = getKing(color);
+		var map = getBeatenMap(color);
+		return map[king.cellY][king.cellX];
+	}
+
+	public function willMoveCheck(piece:Piece, x:Int, y:Int) {
+		var lookAt = pieces[y][x];
+		var origX = piece.cellX;
+		var origY = piece.cellY;
+
+		pieces[y][x] = piece;
+		pieces[piece.cellY][piece.cellX] = null;
+		piece.cellX = x;
+		piece.cellY = y;
+
+		var king = getKing(piece.color);
+		var newMap = this.getBeatenCells(pieces, piece.color);
+		var answ = newMap[king.cellY][king.cellX];
+
+		piece.cellX = origX;
+		piece.cellY = origY;
+		pieces[y][x] = lookAt;
+		pieces[origY][origX] = piece;
+
+		return answ;
+	}
+
+	public function filterCheckMoves(piece:Piece, moves:Array<MoveType>) {
+		return moves.filter(move -> {
+			// TODO - вынести?
+			var to:Cell = move.getParameters()[0];
+			return !willMoveCheck(piece, to.x, to.y);
+		});
 	}
 
 	public function movePiece(piece:Piece, x:Int, y:Int) {

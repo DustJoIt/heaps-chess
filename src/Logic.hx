@@ -1,5 +1,6 @@
 package src;
 
+import src.AssetsManager.Color;
 import src.pieces.Piece;
 import src.Constraints;
 
@@ -51,7 +52,8 @@ class Logic {
 		var iter = piece.getInter();
 		iter.onOver = function(e:hxd.Event) {
 			if (selected == null) {
-				showHovered(piece.canMoveTo(board));
+				var g = board.filterCheckMoves(piece, piece.canMoveTo(board));
+				showHovered(g);
 				drawer.addRectangle(piece.cellX, piece.cellY, 0xAAAAAA);
 			}
 		}
@@ -64,7 +66,7 @@ class Logic {
 			clickDeselect();
 			selected = piece;
 			piece.select();
-			var highlighted = piece.canMoveTo(board);
+			var highlighted = board.filterCheckMoves(piece, piece.canMoveTo(board));
 			for (type in highlighted) {
 				addSelectionRectangle(type);
 			}
