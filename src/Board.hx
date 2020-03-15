@@ -116,8 +116,19 @@ class Board {
 		return answ;
 	}
 
-	public function filterCheckMoves(piece:Piece, moves:Array<MoveType>) {
-		return moves.filter(move -> {
+	public function isMate(color:Color) {
+		for (row in pieces) {
+			for (piece in row) {
+				if ((piece != null) && (piece.color == color) && filterCheckMoves(piece).length > 0)
+					return false;
+			}
+		}
+
+		return true;
+	}
+
+	public function filterCheckMoves(piece:Piece) {
+		return piece.canMoveTo(this).filter(move -> {
 			// TODO - вынести?
 			var to:Cell = move.getParameters()[0];
 			return !willMoveCheck(piece, to.x, to.y);

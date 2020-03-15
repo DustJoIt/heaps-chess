@@ -1,5 +1,4 @@
 -lib heaps
 -lib hlsdl
 -hl hello.hl
--D debug
 -main Main

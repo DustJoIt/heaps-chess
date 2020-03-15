@@ -1,6 +1,6 @@
 package src;
 
-import src.AssetsManager.Color;
+import src.pieces.Pawn;
 import src.pieces.Piece;
 import src.Constraints;
 
@@ -52,7 +52,7 @@ class Logic {
 		var iter = piece.getInter();
 		iter.onOver = function(e:hxd.Event) {
 			if (selected == null) {
-				var g = board.filterCheckMoves(piece, piece.canMoveTo(board));
+				var g = board.filterCheckMoves(piece);
 				showHovered(g);
 				drawer.addRectangle(piece.cellX, piece.cellY, 0xAAAAAA);
 			}
@@ -66,7 +66,7 @@ class Logic {
 			clickDeselect();
 			selected = piece;
 			piece.select();
-			var highlighted = board.filterCheckMoves(piece, piece.canMoveTo(board));
+			var highlighted = board.filterCheckMoves(piece);
 			for (type in highlighted) {
 				addSelectionRectangle(type);
 			}
@@ -105,6 +105,10 @@ class Logic {
 				fromX = piece.cellX;
 				fromY = piece.cellY;
 				board.movePiece(piece, to.x, to.y);
+				if (Std.is(piece, Pawn) && to.y == (piece.color == White ? 0 : (Constraints.BOARD_SIZE - 1))) {
+					board.removePiece(piece);
+					addPiece(src.pieces.PieceFactory.createPieceKind(Piece(Queen, piece.color), to.x, to.y));
+				}
 				currentPlayer = currentPlayer == White ? Black : White;
 		}
 		// specific
@@ -121,6 +125,8 @@ class Logic {
 
 		board.logMove({piece: piece, move: move, from: {x: fromX, y: fromY}});
 		board.updateBeatenMaps();
+		if (board.isMate(currentPlayer))
+			trace(currentPlayer, "lost");
 	}
 
 	public function startGame() {
